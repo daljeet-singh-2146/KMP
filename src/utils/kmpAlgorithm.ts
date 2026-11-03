@@ -8,6 +8,70 @@ import type { LPSStep, MatchingStep } from '../types/kmp';
  * 3. If mismatch and len != 0: len = lps[len - 1] (fallback animated individually)
  * 4. If mismatch and len == 0: lps[i] = 0, i++
  */
+
+function computeLPS(pattern: string): number[] {
+    const m = pattern.length;
+    const lps: number[] = new Array(m).fill(0);
+
+    let len = 0;
+    let i = 1;
+
+    while (i < m) {
+        if (pattern[i] === pattern[len]) {
+            len++;
+            lps[i] = len;
+            i++;
+        } 
+        else {
+            if (len !== 0) {
+                len = lps[len - 1];
+            } 
+            else {
+                lps[i] = 0;
+                i++;
+            }
+        }
+    }
+
+    return lps;
+}
+
+function KMP(text: string, pattern: string): number[] {
+    const n = text.length;
+    const m = pattern.length;
+
+    if (m === 0) return [];
+
+    const lps = computeLPS(pattern);
+
+    let i = 0; // Text pointer
+    let j = 0; // Pattern pointer
+
+    const result: number[] = [];
+
+    while (i < n) {
+        if (text[i] === pattern[j]) {
+            i++;
+            j++;
+        }
+
+        if (j === m) {
+            result.push(i - j);
+            j = lps[j - 1];
+        }
+        else if (i < n && text[i] !== pattern[j]) {
+            if (j !== 0) {
+                j = lps[j - 1];
+            }
+            else {
+                i++;
+            }
+        }
+    }
+
+    return result;
+}
+
 export function generateLPSSteps(pattern: string): LPSStep[] {
   const steps: LPSStep[] = [];
   const m = pattern.length;
